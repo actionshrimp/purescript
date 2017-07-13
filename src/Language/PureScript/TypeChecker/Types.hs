@@ -692,9 +692,16 @@ check' e@(Literal (ObjectLiteral ps)) t@(TypeApp obj row) | obj == tyRecord = do
   ensureNoDuplicateProperties ps
   ps' <- checkProperties e ps row False
   return $ TypedValue True (Literal (ObjectLiteral ps')) t
-check' (TypeClassDictionaryConstructorApp name ps) t = do
-  ps' <- check' ps t
-  return $ TypedValue True (TypeClassDictionaryConstructorApp name ps') t
+check' (TypeClassDictionaryConstructorApp name ps) t@(TypeApp d cls)
+  | d == tyDict
+  , Just cls' <- fixClassType cls
+  = do cls'' <- introduceSkolemScope <=< replaceAllTypeSynonyms <=< replaceTypeWildcards $ cls'
+       ps' <- check' ps cls''
+       return $ TypedValue True (TypeClassDictionaryConstructorApp name ps') t
+  where fixClassType (TypeApp t1 t2) = TypeApp <$> fixClassType t1 <*> pure t2
+        fixClassType (KindedType t1 k) = KindedType <$> fixClassType t1 <*> pure k
+        fixClassType (ConstraintProxy c) = Just (TypeConstructor (fmap coerceProperName c))
+        fixClassType _ = Nothing
 check' e@(ObjectUpdate obj ps) t@(TypeApp o row) | o == tyRecord = do
   ensureNoDuplicateProperties ps
   -- We need to be careful to avoid duplicate labels here.

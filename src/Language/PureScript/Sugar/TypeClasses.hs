@@ -298,10 +298,10 @@ typeInstanceDictionaryDeclaration sa name mn deps className tys decls =
             ]
 
       let props = Literal $ ObjectLiteral $ map (first mkString) (members ++ superclasses)
-          dictTy = foldl TypeApp (TypeConstructor (fmap coerceProperName className)) tys
+          dictTy = TypeApp tyDict (foldl TypeApp (ConstraintProxy className) tys)
           constrainedTy = quantify (foldr ConstrainedType dictTy deps)
           dict = TypeClassDictionaryConstructorApp className props
-          result = ValueDeclaration sa name Private [] [MkUnguarded (TypedValue True dict constrainedTy)]
+          result = ValueDeclaration sa name Public [] [MkUnguarded (TypedValue True dict constrainedTy)]
       return result
 
   where

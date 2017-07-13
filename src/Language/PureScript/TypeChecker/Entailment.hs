@@ -179,6 +179,8 @@ entails SolverOptions{..} constraint context hints =
     ctorModules :: Type -> Maybe ModuleName
     ctorModules (TypeConstructor (Qualified (Just mn) _)) = Just mn
     ctorModules (TypeConstructor (Qualified Nothing _)) = internalError "ctorModules: unqualified type name"
+    ctorModules (ConstraintProxy (Qualified (Just mn) _)) = Just mn
+    ctorModules (ConstraintProxy (Qualified Nothing _)) = internalError "ctorModules: unqualified class name"
     ctorModules (TypeApp ty _) = ctorModules ty
     ctorModules (KindedType ty _) = ctorModules ty
     ctorModules _ = Nothing

@@ -146,19 +146,31 @@ applyExternsFileToEnvironment :: ExternsFile -> Environment -> Environment
 applyExternsFileToEnvironment ExternsFile{..} = flip (foldl' applyDecl) efDeclarations
   where
   applyDecl :: Environment -> ExternsDeclaration -> Environment
-  applyDecl env (EDType pn kind tyKind) = env { types = M.insert (qual pn) (kind, tyKind) (types env) }
-  applyDecl env (EDTypeSynonym pn args ty) = env { typeSynonyms = M.insert (qual pn) (args, ty) (typeSynonyms env) }
-  applyDecl env (EDDataConstructor pn dTy tNm ty nms) = env { dataConstructors = M.insert (qual pn) (dTy, tNm, ty, nms) (dataConstructors env) }
-  applyDecl env (EDValue ident ty) = env { names = M.insert (Qualified (Just efModuleName) ident) (ty, External, Defined) (names env) }
-  applyDecl env (EDClass pn args members cs deps) = env { typeClasses = M.insert (qual pn) (makeTypeClassData args members cs deps) (typeClasses env) }
-  applyDecl env (EDKind pn) = env { kinds = S.insert (qual pn) (kinds env) }
-  applyDecl env (EDInstance className ident tys cs) = env { typeClassDictionaries = updateMap (updateMap (M.insert (qual ident) dict) className) (Just efModuleName) (typeClassDictionaries env) }
+  applyDecl env (EDType pn kind tyKind) =
+    env { types = M.insert (qual pn) (kind, tyKind) (types env) }
+  applyDecl env (EDTypeSynonym pn args ty) =
+    env { typeSynonyms = M.insert (qual pn) (args, ty) (typeSynonyms env) }
+  applyDecl env (EDDataConstructor pn dTy tNm ty nms) =
+    env { dataConstructors = M.insert (qual pn) (dTy, tNm, ty, nms) (dataConstructors env) }
+  applyDecl env (EDValue ident ty) =
+    env { names = M.insert (Qualified (Just efModuleName) ident) (ty, External, Defined) (names env) }
+  applyDecl env (EDClass pn args members cs deps) =
+    env { typeClasses = M.insert (qual pn) (makeTypeClassData args members cs deps) (typeClasses env) }
+  applyDecl env (EDKind pn) =
+    env { kinds = S.insert (qual pn) (kinds env) }
+  applyDecl env (EDInstance className ident tys cs) =
+      env { typeClassDictionaries = updateMap (updateMap (M.insert (qual ident) dict) className) (Just efModuleName) (typeClassDictionaries env)
+          , names = M.insert (Qualified (Just efModuleName) ident) (dictTy, External, Defined) (names env)
+          }
     where
-    dict :: NamedDict
-    dict = TypeClassDictionaryInScope (qual ident) [] className tys cs
+      dictTy :: Type
+      dictTy = TypeApp tyDict (foldl TypeApp (ConstraintProxy className) tys)
 
-    updateMap :: (Ord k, Monoid a) => (a -> a) -> k -> M.Map k a -> M.Map k a
-    updateMap f = M.alter (Just . f . fold)
+      dict :: NamedDict
+      dict = TypeClassDictionaryInScope (qual ident) [] className tys cs
+
+      updateMap :: (Ord k, Monoid a) => (a -> a) -> k -> M.Map k a -> M.Map k a
+      updateMap f = M.alter (Just . f . fold)
 
   qual :: a -> Qualified a
   qual = Qualified (Just efModuleName)
