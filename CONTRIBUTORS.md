@@ -33,6 +33,7 @@ If you would prefer to use different terms, please use the section below instead
 | [@chrisdone](https://github.com/chrisdone) | Chris Done | MIT license |
 | [@cmdv](https://github.com/cmdv) | Vincent Orr | MIT license |
 | [@codedmart](https://github.com/codedmart) | Brandon Martin | [MIT license](http://opensource.org/licenses/MIT) |
+| [@coot](https://github.com/coot) | Marcin Szamotulski | [MIT license](http://opensource.org/licenses/MIT) |
 | [@davidchambers](https://github.com/davidchambers) | David Chambers | [MIT license](http://opensource.org/licenses/MIT) |
 | [@DavidLindbom](https://github.com/DavidLindbom) | David Lindbom | [MIT license](http://opensource.org/licenses/MIT) |
 | [@dckc](https://github.com/dckc) | Dan Connolly | [MIT license](http://opensource.org/licenses/MIT) |
@@ -85,6 +86,7 @@ If you would prefer to use different terms, please use the section below instead
 | [@rightfold](https://github.com/rightfold) | rightfold | [MIT license](https://opensource.org/licenses/MIT) |
 | [@robdaemon](https://github.com/robdaemon) | Robert Roland | [MIT license](http://opensource.org/licenses/MIT) |
 | [@RossMeikleham](https://github.com/RossMeikleham) | Ross Meikleham | [MIT license](http://opensource.org/licenses/MIT) |
+| [@Rufflewind](https://github.com/Rufflewind) | Phil Ruffwind | [MIT license](https://opensource.org/licenses/MIT) |
 | [@rvion](https://github.com/rvion) | Rémi Vion | [MIT license](http://opensource.org/licenses/MIT) |
 | [@RyanGlScott](https://github.com/RyanGlScott) | Ryan Scott | [MIT license](http://opensource.org/licenses/MIT) |
 | [@sebastiaanvisser](https://github.com/sebastiaanvisser) | Sebastiaan Visser | MIT license |
@@ -122,3 +124,4 @@ If you would prefer to use different terms, please use the section below instead
 | Username | Company | Terms |
 | :------- | :--- | :------ |
 | [@slamdata](https://github.com/slamdata) | SlamData, Inc. | Speaking on behalf of SlamData for SlamData employees, our existing contributions and all future contributions to the PureScript compiler are, until further notice, Copyright SlamData Inc., and are licensed to the owners and users of the PureScript compiler project under the terms of the [MIT license](http://opensource.org/licenses/MIT). - @jdegoes |
+| [@qfpl](https://github.com/qfpl) | qfpl @ Data61 / CSIRO | Our existing contributions to the PureScript compiler and all future contributions to the PureScript compiler until further notice, are Copyright Data61 / CSIRO, and are licensed to the owners and users of the PureScript compiler project under the terms of the [MIT license](http://opensource.org/licenses/MIT). - [@lightandlight](https://github.com/lightandlight) |

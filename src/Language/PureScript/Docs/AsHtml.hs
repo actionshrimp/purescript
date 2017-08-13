@@ -15,11 +15,11 @@ module Language.PureScript.Docs.AsHtml (
 ) where
 
 import Prelude
-import Control.Arrow (second)
 import Control.Category ((>>>))
 import Control.Monad (unless)
 import Data.Char (isUpper)
 import Data.Either (isRight)
+import Data.Maybe (fromMaybe)
 import Data.Monoid ((<>))
 import Data.Foldable (for_)
 import Data.String (fromString)
@@ -70,22 +70,31 @@ nullRenderContext mn = HtmlRenderContext
   , renderSourceLink = const Nothing
   }
 
-packageAsHtml :: (P.ModuleName -> HtmlRenderContext) -> Package a -> HtmlOutput Html
+packageAsHtml
+    :: (InPackage P.ModuleName -> Maybe HtmlRenderContext)
+    -> Package a
+    -> HtmlOutput Html
 packageAsHtml getHtmlCtx Package{..} =
   HtmlOutput indexFile modules
   where
   indexFile = []
-  modules = map (\m -> moduleAsHtml (getHtmlCtx (modName m)) m) pkgModules
+  modules = moduleAsHtml getHtmlCtx <$> pkgModules
 
-moduleAsHtml :: HtmlRenderContext -> Module -> (P.ModuleName, HtmlOutputModule Html)
-moduleAsHtml r Module{..} = (modName, HtmlOutputModule modHtml reexports)
+moduleAsHtml
+    :: (InPackage P.ModuleName -> Maybe HtmlRenderContext)
+    -> Module
+    -> (P.ModuleName, HtmlOutputModule Html)
+moduleAsHtml getR Module{..} = (modName, HtmlOutputModule modHtml reexports)
   where
-  renderDecl = declAsHtml r
   modHtml = do
-    for_ modComments renderMarkdown
-    for_ modDeclarations renderDecl
+    let r = fromMaybe (nullRenderContext modName) $ getR (Local modName)
+     in do
+        for_ modComments renderMarkdown
+        for_ modDeclarations (declAsHtml r)
   reexports =
-    map (second (foldMap renderDecl)) modReExports
+    flip map modReExports $ \(pkg, decls) ->
+        let r = fromMaybe (nullRenderContext modName) $ getR pkg
+         in (pkg, foldMap (declAsHtml r) decls)
 
 -- renderIndex :: LinksContext -> [(Maybe Char, Html)]
 -- renderIndex LinksContext{..} = go ctxBookmarks
@@ -129,6 +138,8 @@ declAsHtml r d@Declaration{..} = do
     h3 ! A.class_ "decl__title clearfix" $ do
       a ! A.class_ "decl__anchor" ! A.href (v declFragment) $ "#"
       H.span $ text declTitle
+      text " " -- prevent browser from treating
+               -- declTitle + linkToSource as one word
       for_ declSourceSpan (linkToSource r)
 
     H.div ! A.class_ "decl__body" $ do
