@@ -7,12 +7,10 @@ import           Control.Monad.IO.Class (liftIO)
 import           Control.Monad.Trans.RWS.Strict (evalRWST, RWST)
 import qualified Language.PureScript as P
 import           Language.PureScript.Interactive
-import           System.Directory (getCurrentDirectory)
 import           System.Exit
-import           System.FilePath ((</>))
-import qualified System.FilePath.Glob as Glob
 import           System.Process (readProcessWithExitCode)
 import           Test.Hspec (shouldBe)
+import qualified TestUtils as TU
 
 -- | A monad transformer for handle PSCi actions in tests
 type TestPSCi a = RWST PSCiConfig () PSCiState IO a
@@ -21,21 +19,13 @@ type TestPSCi a = RWST PSCiConfig () PSCiState IO a
 initTestPSCiEnv :: IO (PSCiState, PSCiConfig)
 initTestPSCiEnv = do
   -- Load test support packages
-  cwd <- getCurrentDirectory
-  let supportDir = cwd </> "tests" </> "support" </> "bower_components"
-  let supportFiles ext = Glob.globDir1 (Glob.compile ("purescript-*/src/**/*." ++ ext)) supportDir
-  pursFiles <- supportFiles "purs"
-  modulesOrError <- loadAllModules pursFiles
-  case modulesOrError of
-    Left err ->
-      print err >> exitFailure
-    Right modules -> do
-      -- Make modules
-      makeResultOrError <- runMake . make $ modules
-      case makeResultOrError of
-        Left errs -> putStrLn (P.prettyPrintMultipleErrors P.defaultPPEOptions errs) >> exitFailure
-        Right (externs, env) ->
-          return (PSCiState [] [] (zip (map snd modules) externs), PSCiConfig pursFiles env)
+  supportModules <- TU.getSupportModuleTuples
+    -- Make modules
+  makeResultOrError <- runMake . make $ supportModules
+  case makeResultOrError of
+    Left errs -> putStrLn (P.prettyPrintMultipleErrors P.defaultPPEOptions errs) >> exitFailure
+    Right (externs, env) ->
+      return (PSCiState [] [] (zip (map snd supportModules) externs), PSCiConfig (map fst supportModules) env)
 
 -- | Execute a TestPSCi, returning IO
 execTestPSCi :: TestPSCi a -> IO a
