@@ -330,8 +330,8 @@ command = loop <$> options
               Right (modules, externs, env) -> do
                 historyFilename <- getHistoryFilename
                 let settings = defaultSettings { historyFile = Just historyFilename }
-                    initialState = PSCiState [] [] (zip (map snd modules) externs)
-                    config = PSCiConfig psciInputGlob env
+                    initialState = PSCiState [] [] (zip (map snd modules) externs) env
+                    config = PSCiConfig psciInputGlob
                     runner = flip runReaderT config
                              . flip evalStateT initialState
                              . runInputT (setComplete completion settings)

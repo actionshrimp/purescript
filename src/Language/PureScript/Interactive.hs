@@ -124,12 +124,13 @@ handleReloadState reload = do
   files <- liftIO $ concat <$> traverse glob globs
   e <- runExceptT $ do
     modules <- ExceptT . liftIO $ loadAllModules files
-    (externs, _) <- ExceptT . liftIO . runMake . make $ modules
-    return (map snd modules, externs)
+    (externs, env) <- ExceptT . liftIO . runMake . make $ modules
+    return (map snd modules, externs, env)
   case e of
     Left errs -> printErrors errs
-    Right (modules, externs) -> do
+    Right (modules, externs, env) -> do
       modify (updateLoadedExterns (const (zip modules externs)))
+      modify (updateEnv (const env))
       reload
 
 -- | Clear the application state
@@ -290,8 +291,7 @@ handleBrowse
   -> P.ModuleName
   -> m ()
 handleBrowse print' moduleName = do
-  st <- get
-  env <- asks psciEnvironment
+  st@(PSCiState _ _ _ env) <- get
   if isModInEnv moduleName st
     then print' $ printModuleSignatures moduleName env
     else case lookupUnQualifiedModName moduleName st of

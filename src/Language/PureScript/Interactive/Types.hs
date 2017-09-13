@@ -13,7 +13,6 @@ import qualified Language.PureScript as P
 --
 data PSCiConfig = PSCiConfig
   { psciFileGlobs           :: [String]
-  , psciEnvironment         :: P.Environment
   } deriving Show
 
 -- | The PSCI state.
@@ -25,10 +24,8 @@ data PSCiState = PSCiState
   { psciImportedModules     :: [ImportedModule]
   , psciLetBindings         :: [P.Declaration]
   , psciLoadedExterns       :: [(P.Module, P.ExternsFile)]
+  , psciEnvironment         :: P.Environment
   } deriving Show
-
-initialPSCiState :: PSCiState
-initialPSCiState = PSCiState [] [] []
 
 -- | All of the data that is contained by an ImportDeclaration in the AST.
 -- That is:
@@ -65,6 +62,9 @@ updateLoadedExterns f st = st { psciLoadedExterns = f (psciLoadedExterns st) }
 -- | Updates the let bindings in the state record.
 updateLets :: ([P.Declaration] -> [P.Declaration]) -> PSCiState -> PSCiState
 updateLets f st = st { psciLetBindings = f (psciLetBindings st) }
+
+updateEnv :: (P.Environment -> P.Environment) -> PSCiState -> PSCiState
+updateEnv f st = st { psciEnvironment = f (psciEnvironment st)}
 
 -- * Commands
 

@@ -98,9 +98,9 @@ runCM act = do
 
 getPSCiStateForCompletion :: IO PSCiState
 getPSCiStateForCompletion = do
-  (PSCiState _ bs es, _) <- initTestPSCiEnv
+  (PSCiState _ bs es env, _) <- initTestPSCiEnv
   let imports = [controlMonadSTasST, (P.ModuleName [P.ProperName "Prelude"], P.Implicit, Nothing)]
-  return $ PSCiState imports bs es
+  return $ PSCiState imports bs es env
 
 controlMonadSTasST :: ImportedModule
 controlMonadSTasST = (s "Control.Monad.ST", P.Implicit, Just (s "ST"))
